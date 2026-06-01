@@ -2,12 +2,13 @@
   "name": "WebAuthn Key Generator",
   "short_name": "WebAuthn",
   "description": "Generate and display cryptographic keys using WebAuthn. Works offline.",
-  "start_url": "/",
+  "start_url": "/index.html",
   "scope": "/",
   "display": "standalone",
   "orientation": "portrait-primary",
   "theme_color": "#0a0a0a",
   "background_color": "#0a0a0a",
+  "prefer_related_applications": false,
   "icons": [
     {
       "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><rect fill='%231a1a1a' width='192' height='192'/><text x='50%' y='50%' font-size='100' fill='%2300ff00' text-anchor='middle' dy='.3em' font-family='monospace' font-weight='bold'>🔐</text></svg>",
@@ -29,6 +30,21 @@
       "sizes": "540x720",
       "type": "image/svg+xml",
       "form_factor": "narrow"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Generate Keys",
+      "short_name": "Generate",
+      "description": "Quickly generate WebAuthn keys",
+      "url": "/index.html?action=generate",
+      "icons": [
+        {
+          "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 96 96'><rect fill='%231a1a1a' width='96' height='96'/><text x='48' y='48' font-size='60' fill='%2300ff00' text-anchor='middle' dy='.3em'>🔑</text></svg>",
+          "sizes": "96x96",
+          "type": "image/svg+xml"
+        }
+      ]
     }
   ]
 }
