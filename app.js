@@ -1,10 +1,12 @@
-// WebAuthn Key Generator App
+// WebAuthn Key Generator App with PWA Install Support
 class WebAuthnApp {
     constructor() {
         this.currentCredential = null;
+        this.deferredPrompt = null;
         this.initElements();
         this.attachEventListeners();
         this.registerServiceWorker();
+        this.setupPWAInstall();
         this.updateStatus();
     }
 
@@ -24,12 +26,81 @@ class WebAuthnApp {
         this.statusText = document.getElementById('statusText');
         this.notification = document.getElementById('notification');
         this.notificationText = document.getElementById('notificationText');
+        this.installPrompt = document.getElementById('installPrompt');
+        this.installBtn = document.getElementById('installBtn');
+        this.dismissBtn = document.getElementById('dismissBtn');
     }
 
     attachEventListeners() {
         this.generateBtn.addEventListener('click', () => this.generateKeys());
         this.copyBtn.addEventListener('click', () => this.copyPublicKey());
         this.clearBtn.addEventListener('click', () => this.clearDisplay());
+        this.installBtn.addEventListener('click', () => this.installApp());
+        this.dismissBtn.addEventListener('click', () => this.dismissInstall());
+    }
+
+    setupPWAInstall() {
+        // Listen for beforeinstallprompt event
+        window.addEventListener('beforeinstallprompt', (e) => {
+            // Prevent the mini-infobar from appearing
+            e.preventDefault();
+            // Store the event for later use
+            this.deferredPrompt = e;
+            // Show our custom install prompt
+            this.showInstallPrompt();
+            console.log('PWA install prompt available');
+        });
+
+        // Handle app installed
+        window.addEventListener('appinstalled', () => {
+            console.log('PWA was installed');
+            this.showNotification('App installed successfully!');
+            this.dismissInstall();
+        });
+
+        // Check if app is already installed
+        if (window.matchMedia('(display-mode: standalone)').matches) {
+            console.log('App is running in standalone mode');
+            this.installPrompt.style.display = 'none';
+        }
+    }
+
+    showInstallPrompt() {
+        if (this.deferredPrompt) {
+            this.installPrompt.style.display = 'block';
+            document.body.classList.add('install-visible');
+        }
+    }
+
+    async installApp() {
+        if (!this.deferredPrompt) {
+            return;
+        }
+
+        try {
+            // Show the install prompt
+            this.deferredPrompt.prompt();
+            // Wait for the user to respond to the prompt
+            const { outcome } = await this.deferredPrompt.userChoice;
+            console.log(`User response to the install prompt: ${outcome}`);
+            
+            // Clear the deferred prompt
+            this.deferredPrompt = null;
+            this.dismissInstall();
+            
+            if (outcome === 'accepted') {
+                this.showNotification('Installing app...');
+            }
+        } catch (error) {
+            console.error('Error during installation:', error);
+            this.showNotification('Installation failed', 'error');
+        }
+    }
+
+    dismissInstall() {
+        this.installPrompt.style.display = 'none';
+        document.body.classList.remove('install-visible');
+        this.deferredPrompt = null;
     }
 
     async registerServiceWorker() {
