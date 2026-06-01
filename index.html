@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="PWA WebAuthn Key Generator">
+    <meta name="theme-color" content="#1a1a1a">
+    <title>WebAuthn Key Generator</title>
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><rect fill='%231a1a1a' width='192' height='192'/><text x='50%' y='50%' font-size='100' fill='%2300ff00' text-anchor='middle' dy='.3em' font-family='monospace' font-weight='bold'>🔐</text></svg>">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🔐 WebAuthn Key Generator</h1>
+            <p class="subtitle">Generate and display cryptographic keys</p>
+        </header>
+
+        <main>
+            <section class="controls">
+                <button id="generateBtn" class="btn btn-primary">
+                    Generate Keys
+                </button>
+                <button id="copyBtn" class="btn btn-secondary" disabled>
+                    Copy Public Key
+                </button>
+                <button id="clearBtn" class="btn btn-secondary" disabled>
+                    Clear
+                </button>
+            </section>
+
+            <section class="display" id="display" style="display: none;">
+                <div class="status-badge">
+                    <span class="badge-dot"></span>
+                    <span id="statusText">Ready</span>
+                </div>
+
+                <div class="key-section">
+                    <h2>Public Key</h2>
+                    <div class="key-output">
+                        <pre id="publicKeyDisplay"></pre>
+                    </div>
+                    <p class="key-info">Format: COSE Key (CBOR)</p>
+                </div>
+
+                <div class="key-section">
+                    <h2>Key Details</h2>
+                    <div class="details-grid">
+                        <div class="detail-item">
+                            <span class="detail-label">Algorithm:</span>
+                            <span class="detail-value" id="algorithmValue">-</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Key Type:</span>
+                            <span class="detail-value" id="keyTypeValue">-</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Curve:</span>
+                            <span class="detail-value" id="curveValue">-</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Generated:</span>
+                            <span class="detail-value" id="generatedValue">-</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="key-section">
+                    <h2>Public Key (Base64)</h2>
+                    <div class="key-output">
+                        <pre id="publicKeyBase64"></pre>
+                    </div>
+                </div>
+
+                <div class="key-section">
+                    <h2>JSON Representation</h2>
+                    <div class="key-output json">
+                        <pre id="jsonDisplay"></pre>
+                    </div>
+                </div>
+            </section>
+
+            <section class="info" id="info">
+                <h2>About WebAuthn</h2>
+                <ul>
+                    <li><strong>WebAuthn</strong> - Web Authentication API for secure key generation</li>
+                    <li><strong>COSE</strong> - CBOR Object Signing and Encryption format</li>
+                    <li><strong>Public Key</strong> - Can be safely shared and stored</li>
+                    <li><strong>Private Key</strong> - Stored securely in authenticator</li>
+                    <li><strong>Offline Ready</strong> - This app works without internet connection</li>
+                </ul>
+            </section>
+
+            <section class="notification" id="notification" style="display: none;">
+                <span id="notificationText"></span>
+            </section>
+        </main>
+
+        <footer>
+            <p>WebAuthn Key Generator • Offline PWA • No frameworks</p>
+            <a href="https://github.com/alextorrin/webauthn" target="_blank">View on GitHub</a>
+        </footer>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
