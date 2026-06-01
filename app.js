@@ -8,6 +8,7 @@ class WebAuthnApp {
         this.registerServiceWorker();
         this.setupPWAInstall();
         this.updateStatus();
+        this.logPWAStatus();
     }
 
     initElements() {
@@ -40,29 +41,93 @@ class WebAuthnApp {
     }
 
     setupPWAInstall() {
+        console.log('🔧 Setting up PWA install listeners...');
+
         // Listen for beforeinstallprompt event
         window.addEventListener('beforeinstallprompt', (e) => {
+            console.log('✅ beforeinstallprompt fired!');
             // Prevent the mini-infobar from appearing
             e.preventDefault();
             // Store the event for later use
             this.deferredPrompt = e;
             // Show our custom install prompt
             this.showInstallPrompt();
-            console.log('PWA install prompt available');
         });
 
         // Handle app installed
         window.addEventListener('appinstalled', () => {
-            console.log('PWA was installed');
+            console.log('✅ PWA was installed');
             this.showNotification('App installed successfully!');
             this.dismissInstall();
         });
 
         // Check if app is already installed
         if (window.matchMedia('(display-mode: standalone)').matches) {
-            console.log('App is running in standalone mode');
+            console.log('ℹ️ App is running in standalone mode');
             this.installPrompt.style.display = 'none';
+        } else {
+            console.log('ℹ️ App is running in browser mode');
         }
+
+        // Fallback: Show install prompt after delay if beforeinstallprompt doesn't fire
+        setTimeout(() => {
+            if (!this.deferredPrompt && !window.matchMedia('(display-mode: standalone)').matches) {
+                console.log('⚠️ beforeinstallprompt did not fire. Showing fallback UI.');
+                this.showFallbackInstallPrompt();
+            }
+        }, 3000);
+    }
+
+    showFallbackInstallPrompt() {
+        // Show fallback UI with manual installation instructions
+        const fallbackHTML = `
+            <div style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); 
+                        background: #1a1a1a; border: 2px solid #00ff00; padding: 30px; 
+                        border-radius: 8px; text-align: center; z-index: 10000; max-width: 400px;
+                        box-shadow: 0 0 30px rgba(0, 255, 0, 0.3);">
+                <h2 style="color: #00ff00; margin-bottom: 20px; font-family: monospace;">📱 Install App</h2>
+                <p style="color: #e0e0e0; margin-bottom: 20px; font-family: monospace; line-height: 1.8;">
+                    <strong>Desktop Chrome:</strong><br>
+                    Click ⊕ icon in address bar<br><br>
+                    <strong>Mobile Chrome:</strong><br>
+                    Menu ⋮ → "Add to home screen"<br><br>
+                    <strong>Firefox/Safari:</strong><br>
+                    Not yet supported
+                </p>
+                <button id="closeFallback" style="padding: 10px 20px; background: #00ff00; 
+                        color: #0a0a0a; border: none; border-radius: 4px; 
+                        font-weight: bold; cursor: pointer; font-family: monospace;">Close</button>
+            </div>
+        `;
+        
+        const div = document.createElement('div');
+        div.innerHTML = fallbackHTML;
+        document.body.appendChild(div);
+
+        document.getElementById('closeFallback').addEventListener('click', () => {
+            div.remove();
+        });
+    }
+
+    logPWAStatus() {
+        console.group('📱 PWA Status Check');
+        console.log('📍 URL:', window.location.href);
+        console.log('🔒 HTTPS:', window.location.protocol === 'https:' ? '✅' : '❌ (need HTTPS)');
+        console.log('📦 Manifest:', document.querySelector('link[rel="manifest"]') ? '✅' : '❌');
+        console.log('🔧 Service Worker:', 'serviceWorker' in navigator ? '✅' : '❌');
+        console.log('📲 Standalone mode:', window.matchMedia('(display-mode: standalone)').matches ? '✅' : '❌');
+        console.log('🎯 beforeinstallprompt support:', 'onbeforeinstallprompt' in window ? '✅' : '❌');
+        console.log('🌐 Browser:', this.detectBrowser());
+        console.groupEnd();
+    }
+
+    detectBrowser() {
+        const ua = navigator.userAgent;
+        if (ua.includes('Chrome')) return 'Chrome ✅';
+        if (ua.includes('Firefox')) return 'Firefox (limited support)';
+        if (ua.includes('Safari')) return 'Safari (not supported)';
+        if (ua.includes('Edge')) return 'Edge ✅';
+        return 'Unknown';
     }
 
     showInstallPrompt() {
@@ -74,6 +139,8 @@ class WebAuthnApp {
 
     async installApp() {
         if (!this.deferredPrompt) {
+            console.warn('⚠️ deferredPrompt is not available');
+            this.showNotification('Use browser menu: Chrome icon or menu ⋮', 'error');
             return;
         }
 
@@ -82,7 +149,7 @@ class WebAuthnApp {
             this.deferredPrompt.prompt();
             // Wait for the user to respond to the prompt
             const { outcome } = await this.deferredPrompt.userChoice;
-            console.log(`User response to the install prompt: ${outcome}`);
+            console.log(`📝 User response: ${outcome}`);
             
             // Clear the deferred prompt
             this.deferredPrompt = null;
@@ -90,9 +157,11 @@ class WebAuthnApp {
             
             if (outcome === 'accepted') {
                 this.showNotification('Installing app...');
+            } else {
+                this.showNotification('Installation dismissed');
             }
         } catch (error) {
-            console.error('Error during installation:', error);
+            console.error('❌ Error during installation:', error);
             this.showNotification('Installation failed', 'error');
         }
     }
@@ -100,17 +169,16 @@ class WebAuthnApp {
     dismissInstall() {
         this.installPrompt.style.display = 'none';
         document.body.classList.remove('install-visible');
-        this.deferredPrompt = null;
     }
 
     async registerServiceWorker() {
         if ('serviceWorker' in navigator) {
             try {
-                await navigator.serviceWorker.register('sw.js');
-                console.log('Service Worker registered');
+                const registration = await navigator.serviceWorker.register('sw.js');
+                console.log('✅ Service Worker registered:', registration.scope);
                 this.updateStatus();
             } catch (error) {
-                console.log('Service Worker registration failed:', error);
+                console.log('❌ Service Worker registration failed:', error);
             }
         }
     }
