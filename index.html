@@ -41,7 +41,7 @@
                     Generate Keys
                 </button>
                 <button id="copyBtn" class="btn btn-secondary" disabled>
-                    Copy Public Key
+                    Copy PEM Key
                 </button>
                 <button id="clearBtn" class="btn btn-secondary" disabled>
                     Clear
@@ -55,11 +55,11 @@
                 </div>
 
                 <div class="key-section">
-                    <h2>Public Key</h2>
+                    <h2>Public Key (PEM Format)</h2>
                     <div class="key-output">
-                        <pre id="publicKeyDisplay"></pre>
+                        <pre id="publicKeyPEM"></pre>
                     </div>
-                    <p class="key-info">Format: COSE Key (CBOR)</p>
+                    <p class="key-info">Standard PEM format for easy sharing</p>
                 </div>
 
                 <div class="key-section">
@@ -85,14 +85,14 @@
                 </div>
 
                 <div class="key-section">
-                    <h2>Public Key (Base64)</h2>
-                    <div class="key-output">
-                        <pre id="publicKeyBase64"></pre>
+                    <h2>Raw COSE Key</h2>
+                    <div class="key-output json">
+                        <pre id="coseKeyDisplay"></pre>
                     </div>
                 </div>
 
                 <div class="key-section">
-                    <h2>JSON Representation</h2>
+                    <h2>Credential JSON</h2>
                     <div class="key-output json">
                         <pre id="jsonDisplay"></pre>
                     </div>
@@ -106,6 +106,7 @@
                     <li><strong>COSE</strong> - CBOR Object Signing and Encryption format</li>
                     <li><strong>Public Key</strong> - Can be safely shared and stored</li>
                     <li><strong>Private Key</strong> - Stored securely in authenticator</li>
+                    <li><strong>PEM Format</strong> - Standard format for X.509 certificates</li>
                     <li><strong>Offline Ready</strong> - This app works without internet connection</li>
                 </ul>
             </section>
@@ -121,6 +122,7 @@
         </footer>
     </div>
 
+    <script src="cbor.js"></script>
     <script src="app.js"></script>
 </body>
 </html>
